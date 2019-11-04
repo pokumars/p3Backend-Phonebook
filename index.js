@@ -1,6 +1,9 @@
 const express = require('express');
 const app = express();
 
+const bodyParser = require('body-parser');
+app.use(bodyParser.json());
+
 let persons= [
     {
       "name": "Josif Stalin",
@@ -62,6 +65,32 @@ app.delete('/api/persons/:id', (request, response)=> {
     persons = persons.filter((p)=>p.id !== id);
 
     response.status(204).end();
+});
+
+const generateId= ()=> {
+    return Math.floor(Math.random() *1000) + 1
+}
+
+app.post('/api/persons',(request, response) => {
+    const body = request.body;
+    //console.log('headers--->', request.headers);
+    //console.log('body--->', request.body);
+
+    if(!body.name || !body.number){
+        return response.status(400).json({
+            error: 'missing number or name'
+        })
+    }
+
+    const newPerson = {
+        "name": body.name,
+        "number": body.number,
+        "id": generateId()
+    }
+
+    persons = persons.concat(newPerson);
+    console.log(newPerson);
+    response.json(newPerson)
 });
 
 
