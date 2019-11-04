@@ -56,6 +56,14 @@ app.get('/info', (request, response)=> {
     <br> ${new Date()}</p>`)
 });
 
+app.delete('/api/persons/:id', (request, response)=> {
+    const id = Number(request.params.id);
+    console.log('delete a note');
+    persons = persons.filter((p)=>p.id !== id);
+
+    response.status(204).end();
+});
+
 
 const port = 3001;
 app.listen(port);
