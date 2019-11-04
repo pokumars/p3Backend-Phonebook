@@ -4,6 +4,22 @@ const app = express();
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 
+const morgan = require('morgan');
+
+//Define my own morgan token called body
+morgan.token('body', function (req, res) { return JSON.stringify(req.body)});
+
+app.use(morgan((tokens, req, res)=> {
+  return [
+    tokens.method(req, res),
+    tokens.url(req, res),
+    tokens.status(req, res),
+    tokens.res(req, res, 'content-length'), '-',
+    tokens['response-time'](req, res), 'ms',
+    tokens.body(req, res),
+  ].join(' ')
+}));
+
 let persons= [
     {
       "name": "Josif Stalin",
