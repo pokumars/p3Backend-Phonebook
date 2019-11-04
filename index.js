@@ -23,12 +23,12 @@ let persons= [
     {
       "name": "jon legend",
       "number": "2549873",
-      "id": 9
+      "id": 4
     },
     {
       "name": "oheneba",
       "number": "154844548",
-      "id": 4
+      "id": 5
     }
 ]
 
@@ -76,21 +76,34 @@ app.post('/api/persons',(request, response) => {
     //console.log('headers--->', request.headers);
     //console.log('body--->', request.body);
 
-    if(!body.name || !body.number){
+    if(!body.name || !body.number){//if body is empty
         return response.status(400).json({
             error: 'missing number or name'
         })
     }
-
-    const newPerson = {
-        "name": body.name,
-        "number": body.number,
-        "id": generateId()
+    const nameExists = persons.find((p)=> p.name === body.name);
+    const numberExists = persons.find((p)=> p.number === body.number);
+    
+    if(nameExists){
+        response.status(400).json({
+            error:"The name already exists in phonebook"
+        });
     }
-
-    persons = persons.concat(newPerson);
-    console.log(newPerson);
-    response.json(newPerson)
+    else if(numberExists){
+        response.status(400).json({
+            error:"The number already exists in phonebook"
+        });
+    }else{
+        const newPerson = {
+            "name": body.name,
+            "number": body.number,
+            "id": generateId()
+        }
+    
+        persons = persons.concat(newPerson);
+        console.log(newPerson);
+        response.json(newPerson)
+    }
 });
 
 
