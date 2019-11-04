@@ -34,8 +34,17 @@ app.get('/', (request, response)=> {
     //response.send(`<p>Request received at ${}</p>`);
 });
 
+/*app.get('/persons', (request, response)=> {
+    response.json(persons);
+});*/
+
 app.get('/api/persons', (request, response)=> {
     response.json(persons);
+});
+
+app.get('/info', (request, response)=> {
+    response.send(`<p>Phonebook has ${persons.length} contacts. 
+    <br> ${new Date()}</p>`)
 });
 
 
