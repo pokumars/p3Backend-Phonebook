@@ -4,7 +4,9 @@ const app = express();
 app.use(cors());
 
 const bodyParser = require('body-parser');
+
 app.use(bodyParser.json());
+app.use(express.static('build'));
 
 const morgan = require('morgan');
 
