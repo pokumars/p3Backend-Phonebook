@@ -85,6 +85,26 @@ app.delete('/api/persons/:id', (request, response)=> {
     response.status(204).end();
 });
 
+app.put('/api/persons/:id',(request, response)=> {
+    const id = Number(request.params.id);
+    const replacement = request.body
+    console.log('replacement body --->', replacement)
+
+    if(replacement.name && replacement.number){
+        //find whic obj is to be replaced and its index
+        let ToBeReplaced = persons.find((p)=>p.name === replacement.name || p.number === replacement.number)
+        let index = persons.indexOf(ToBeReplaced);
+
+        //change the parts accordingly
+        persons[index].number =replacement.number
+        persons[index].name =replacement.name
+
+        //return the updated obj
+        let resObj =persons[index]
+        response.json(resObj);
+    }
+});
+
 const generateId= ()=> {
     return Math.floor(Math.random() *1000) + 1
 }
@@ -103,11 +123,13 @@ app.post('/api/persons',(request, response) => {
     const numberExists = persons.find((p)=> p.number === body.number);
     
     if(nameExists){
+        console.log(JSON.stringify(nameExists));
         response.status(400).json({
             error:"The name already exists in phonebook"
         });
     }
     else if(numberExists){
+        console.log(JSON.stringify(numberExists));
         response.status(400).json({
             error:"The number already exists in phonebook"
         });
