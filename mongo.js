@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+require('dotenv');
 
 
 //mongoDB doesnt care about what you post so 
@@ -28,8 +29,8 @@ if (process.argv.length <3){
 //e.g "node mongo.js yourpassword"
 const password = process.argv[2];
 
-const url = `mongodb+srv://acerlaptop_fullstack:${password}@phonebookcluster0-0pq3l.mongodb.net/phonebook?retryWrites=true&w=majority`;
-
+const url = `MONGODB_URI =mongodb+srv://acerlaptop_fullstack:${password}@phonebookcluster0-0pq3l.mongodb.net/phonebook?retryWrites=true&w=majority
+`
 mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true  });
 
 

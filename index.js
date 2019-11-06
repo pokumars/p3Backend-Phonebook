@@ -1,4 +1,6 @@
 const express = require('express');
+require('dotenv').config();
+const Person =require('./models/person');
 const cors = require('cors');
 const app = express();
 app.use(cors());
@@ -62,7 +64,13 @@ app.get('/', (request, response)=> {
 });*/
 
 app.get('/api/persons', (request, response)=> {
-    response.json(persons);
+    //response.json(persons);
+    Person.find({}).then(persons => {
+        persons.map((p) =>{
+            console.log(`${p.name} ${p.number}`)
+        });
+        response.json(persons);
+    });
 });
 
 app.get('/api/persons/:id', (request, response)=> {
