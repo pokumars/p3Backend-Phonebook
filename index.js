@@ -152,9 +152,11 @@ app.post('/api/persons',(request, response, next) => {
 
     //save name to mongoDB
     person.save()
-    .then(savedPerson =>{
-        response.json(savedPerson.toJSON())
-    });
+    .then(savedPerson =>savedPerson.toJSON())
+    .then(savedAndFormattedPerson =>{
+        response.json(savedAndFormattedPerson);
+    })
+    .catch(error => next(error));
 });
 
 const errorHandler = (error, request, response, next) =>{
