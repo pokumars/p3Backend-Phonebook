@@ -59,27 +59,18 @@ app.get('/', (request, response)=> {
     //response.send(`<p>Request received at ${}</p>`);
 });
 
-/*app.get('/persons', (request, response)=> {
-    response.json(persons);
-});*/
 
 app.get('/api/persons', (request, response)=> {
     //response.json(persons);
-    Person.find({}).then(persons => {
-        persons.map((p) =>{
-            console.log(`${p.name} ${p.number}`)
-        });
-        response.json(persons);
-    });
+    Person.find({}).then(persons => response.json(persons));
 });
 
 app.get('/api/persons/:id', (request, response)=> {
-    const id = Number(request.params.id);
+    const id = request.params.id
     console.log(`Request id ${id}`);
 
-    const person = persons.find((p)=> p.id === id);
-
-    response.json(person);
+    Person.findById(id)
+    .then(person =>response.json(person.toJSON()));
 });
 
 app.get('/info', (request, response)=> {
@@ -88,15 +79,19 @@ app.get('/info', (request, response)=> {
 });
 
 app.delete('/api/persons/:id', (request, response)=> {
-    const id = Number(request.params.id);
+    const id = request.params.id;
     console.log('delete a note');
-    persons = persons.filter((p)=>p.id !== id);
 
-    response.status(204).end();
+    Person.findByIdAndRemove(id)
+    .then(result => {
+        response.status(204).end()
+    }).catch(error => {
+        console.log(error.message);
+    })
 });
 
-app.put('/api/persons/:id',(request, response)=> {
-    const id = Number(request.params.id);
+/*app.put('/api/persons/:id',(request, response)=> {
+    const id = request.params.id;
     const replacement = request.body
     console.log('replacement body --->', replacement)
 
@@ -113,7 +108,7 @@ app.put('/api/persons/:id',(request, response)=> {
         let resObj =persons[index]
         response.json(resObj);
     }
-});
+});*/
 
 const generateId= ()=> {
     return Math.floor(Math.random() *1000) + 1
@@ -121,15 +116,24 @@ const generateId= ()=> {
 
 app.post('/api/persons',(request, response) => {
     const body = request.body;
-    //console.log('headers--->', request.headers);
-    //console.log('body--->', request.body);
 
     if(!body.name || !body.number){//if body is empty
         return response.status(400).json({
             error: 'missing number or name'
-        })
+        });
     }
-    const nameExists = persons.find((p)=> p.name === body.name);
+
+    const person = new Person({
+        name: body.name,
+        number: body.number
+    });
+
+    person.save()
+    .then(savedPerson =>{
+        response.json(savedPerson.toJSON())
+    });
+
+    /*const nameExists = persons.find((p)=> p.name === body.name);
     const numberExists = persons.find((p)=> p.number === body.number);
     
     if(nameExists){
@@ -153,7 +157,7 @@ app.post('/api/persons',(request, response) => {
         persons = persons.concat(newPerson);
         console.log(newPerson);
         response.json(newPerson)
-    }
+    }*/
 });
 
 

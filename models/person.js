@@ -17,14 +17,14 @@ const personSchema = new mongoose.Schema({
     number: String
 });
 
-/*personSchema.set('toJSON', {
+//format the received json to remove _id and __v fields
+personSchema.set('toJSON', {
 transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString();
     delete returnedObject._id;
     delete returnedObject.__v;
 }
-});*/
-
+});
 
 //create an object(or 'class') called Person based on the schema (or interface) personSchema
 //export that to be used
