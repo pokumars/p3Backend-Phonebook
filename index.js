@@ -98,27 +98,22 @@ app.delete('/api/persons/:id', (request, response)=> {
     }).catch(error => next(error));
 });
 
-/*app.put('/api/persons/:id',(request, response)=> {
+app.put('/api/persons/:id',(request, response)=> {
     const id = request.params.id;
     const replacement = request.body
     console.log('replacement body --->', replacement)
 
     if(replacement.name && replacement.number){
-        //find whic obj is to be replaced and its index
-        let ToBeReplaced = persons.find((p)=>p.name === replacement.name || p.number === replacement.number)
-        let index = persons.indexOf(ToBeReplaced);
-
-        //change the parts accordingly
-        persons[index].number =replacement.number
-        persons[index].name =replacement.name
-
-        //return the updated obj
-        let resObj =persons[index]
-        response.json(resObj);
+        Person.findByIdAndUpdate(id, replacement, { new: true })
+        .then(updatedPerson =>updatedPerson.toJSON())
+        .then(updatedAndFormattedPerson => {
+            response.json(updatedAndFormattedPerson);
+        })
+        .catch(error => next(error))
     }
-});*/
+});
 
-app.post('/api/persons',(request, response) => {
+app.post('/api/persons',(request, response, next) => {
     const body = request.body;
     const id= request.params.id;
     var query = { name: `${body.name}` };
@@ -133,47 +128,33 @@ app.post('/api/persons',(request, response) => {
         name: body.name,
         number: body.number
     });
-    const personToUpdateOrAdd = { $set: {
-        name: body.name,
-        number: body.number
-    } }
+    
+    /* //MISTAKE. I MISUNDERSTOOD THE INSTRUCTIONS FOR 3.17 BUT FIXED IT NOW
 
+
+     const personToUpdateOrAdd = { $set: {
+        name: body.name,
+        number: body.number}
+    }
     //For 3.17 we want to update if it already exists and add if it doesnt 
     //findOneAndUpdate() with option 'upsert' set to true does exactly that
     Person.findOneAndUpdate(
         query,
         personToUpdateOrAdd,
-        {new: true, upsert: true})
-    .then(returnedPerson =>{
-        response.json(returnedPerson.toJSON())
+        {new: true, upsert: true}
+    )
+    .then(returnedPerson =>returnedPerson.toJSON())
+    .then(savedAndFormattedPerson => {
+        response.json(savedAndFormattedPerson)
+    })
+    .catch(error => next(error));*/
+
+
+    //save name to mongoDB
+    person.save()
+    .then(savedPerson =>{
+        response.json(savedPerson.toJSON())
     });
-
-    
-
-    
-    //const numberExists = persons.find((p)=> p.number === body.number);
-    
-    /*if(nameExists){
-        console.log(JSON.stringify(nameExists));
-        response.status(400).json({
-            error:"The name already exists in phonebook"
-        });
-    }
-    else{//save name to mongoDB
-        person.save()
-        .then(savedPerson =>{
-            response.json(savedPerson.toJSON())
-        });
-    }*/
-
-    /**
-     else if(numberExists){
-        console.log(JSON.stringify(numberExists));
-        response.status(400).json({
-            error:"The number already exists in phonebook"
-        });
-    }
-     */
 });
 
 const errorHandler = (error, request, response, next) =>{
@@ -181,6 +162,9 @@ const errorHandler = (error, request, response, next) =>{
 
     if(error.name==='CastError' && error.kind === 'ObjectId'){
         return response.status(400).send({ error: 'malformatted id'});
+    }
+    else if(error.name === 'ValidationError'){
+        return response.status(400).json({ error: error.message })
     }
 
     next(error)

@@ -1,6 +1,9 @@
 
 const mongoose = require('mongoose');
+const uniqueValidator = require('mongoose-unique-validator');
+
 mongoose.set('useFindAndModify', false);
+
 
 const url = process.env.MONGODB_URI;
 mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true  })
@@ -14,9 +17,10 @@ mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true  })
 //mongoDB doesnt care about what you post so 
 //you have to define and restrict by schema on app level
 const personSchema = new mongoose.Schema({
-    name: String,
-    number: String
+    name: {type: String, required: true},
+    number: {type: String, required: true, unique: true}
 });
+personSchema.plugin(uniqueValidator);
 
 //format the received json to remove _id and __v fields
 personSchema.set('toJSON', {

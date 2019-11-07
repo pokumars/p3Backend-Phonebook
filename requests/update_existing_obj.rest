@@ -1,7 +1,7 @@
-PUT http://localhost:3001/api/persons/5dc2e47520e14b1d70c91122
+PUT http://localhost:3001/api/persons/5dc3a5851601e7068474a33c
 content-type: application/json
 
 {
-    "name": "Josif Stalin",
-    "number": "12566"
+    "name": "mamma mia",
+    "number": "88888899999"
 }
