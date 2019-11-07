@@ -16,9 +16,9 @@ app.use(express.static('build'));
 const morgan = require('morgan');
 
 //Define my own morgan token called body
-morgan.token('body', function (req, res) { return JSON.stringify(req.body)});
+morgan.token('body', function (req, res) { return JSON.stringify(req.body);});
 
-app.use(morgan((tokens, req, res)=> {
+app.use(morgan((tokens, req, res) => {
   return [
     tokens.method(req, res),
     tokens.url(req, res),
@@ -26,110 +26,82 @@ app.use(morgan((tokens, req, res)=> {
     tokens.res(req, res, 'content-length'), '-',
     tokens['response-time'](req, res), 'ms',
     tokens.body(req, res),
-  ].join(' ')
+  ].join(' ');
 }));
 
-let persons= [
-    {
-      "name": "Josif Stalin",
-      "number": "125789",
-      "id": 1
-    },
-    {
-      "name": "kobby",
-      "number": "777888999",
-      "id": 2
-    },
-    {
-      "name": "Thiago silva",
-      "number": "484546878",
-      "id": 3
-    },
-    {
-      "name": "jon legend",
-      "number": "2549873",
-      "id": 4
-    },
-    {
-      "name": "oheneba",
-      "number": "154844548",
-      "id": 5
-    }
-]
-
-app.get('/', (request, response)=> {
-    response.send(`<p>The info you want is at /api/persons or at /info</p>`)
-    //response.send(`<p>Request received at ${}</p>`);
+app.get('/', (request, response) => {
+  response.send('<p>The info you want is at /api/persons or at /info</p>');
+  //response.send(`<p>Request received at ${}</p>`);
 });
 
 
-app.get('/api/persons', (request, response)=> {
-    //response.json(persons);
-    Person.find({})
+app.get('/api/persons', (request, response, next) => {
+  //response.json(persons);
+  Person.find({})
     .then(persons => response.json(persons))
     .catch(error => next(error));
 });
 
-app.get('/api/persons/:id', (request, response)=> {
-    const id = request.params.id
-    console.log(`Request id ${id}`);
+app.get('/api/persons/:id', (request, response, next) => {
+  const id = request.params.id;
+  console.log(`Request id ${id}`);
 
-    Person.findById(id)
-    .then(person =>response.json(person.toJSON()))
+  Person.findById(id)
+    .then(person => response.json(person.toJSON()))
     .catch(error => next(error));
 });
 
-app.get('/info', (request, response)=> {
-    Person.find().count((err, count)=>{
-        console.log("Number of docs: ", count );
+app.get('/info', (request, response) => {
+  Person.find().count((err, count) => {
+    console.log('Number of docs: ', count );
 
-        response.send(`<p>Phonebook has ${count} contacts. 
-    <br> ${new Date()}</p>`)
-    });
+    response.send(`<p>Phonebook has ${count} contacts. 
+    <br> ${new Date()}</p>`);
+  });
 });
 
-app.delete('/api/persons/:id', (request, response)=> {
-    const id = request.params.id;
-    console.log('delete a note');
+app.delete('/api/persons/:id', (request, response, next) => {
+  const id = request.params.id;
+  console.log('delete a note');
 
-    Person.findByIdAndRemove(id)
-    .then(result => {
-        response.status(204).end()
+  Person.findByIdAndRemove(id)
+    .then(() => {
+      response.status(204).end();
     }).catch(error => next(error));
 });
 
-app.put('/api/persons/:id',(request, response)=> {
-    const id = request.params.id;
-    const replacement = request.body
-    console.log('replacement body --->', replacement)
+app.put('/api/persons/:id',(request, response, next) => {
+  const id = request.params.id;
+  const replacement = request.body;
+  console.log('replacement body --->', replacement);
 
-    if(replacement.name && replacement.number){
-        Person.findByIdAndUpdate(id, replacement, { new: true })
-        .then(updatedPerson =>updatedPerson.toJSON())
-        .then(updatedAndFormattedPerson => {
-            response.json(updatedAndFormattedPerson);
-        })
-        .catch(error => next(error))
-    }
+  if(replacement.name && replacement.number){
+    Person.findByIdAndUpdate(id, replacement, { new: true })
+      .then(updatedPerson => updatedPerson.toJSON())
+      .then(updatedAndFormattedPerson => {
+        response.json(updatedAndFormattedPerson);
+      })
+      .catch(error => next(error));
+  }
 });
 
 app.post('/api/persons',(request, response, next) => {
-    const body = request.body;
-    const id= request.params.id;
-    var query = { name: `${body.name}` };
+  const body = request.body;
+  //const id= request.params.id;
+  //var query = { name: `${body.name}` };
 
-    if(!body.name || !body.number){//if body is empty
-        return response.status(400).json({
-            error: 'missing number or name'
-        });
-    }
-
-    const person = new Person({
-        name: body.name,
-        number: body.number
+  if(!body.name || !body.number){//if body is empty
+    return response.status(400).json({
+      error: 'missing number or name'
     });
+  }
+
+  const person = new Person({
+    name: body.name,
+    number: body.number
+  });
     
-    /* //MISTAKE. I MISUNDERSTOOD THE INSTRUCTIONS FOR 3.17 BUT FIXED IT NOW
+  /* //MISTAKE. I MISUNDERSTOOD THE INSTRUCTIONS FOR 3.17 BUT FIXED IT NOW
 
 
      const personToUpdateOrAdd = { $set: {
@@ -150,30 +122,30 @@ app.post('/api/persons',(request, response, next) => {
     .catch(error => next(error));*/
 
 
-    //save name to mongoDB
-    person.save()
-    .then(savedPerson =>savedPerson.toJSON())
-    .then(savedAndFormattedPerson =>{
-        response.json(savedAndFormattedPerson);
+  //save name to mongoDB
+  person.save()
+    .then(savedPerson => savedPerson.toJSON())
+    .then(savedAndFormattedPerson => {
+      response.json(savedAndFormattedPerson);
     })
     .catch(error => next(error));
 });
 
-const errorHandler = (error, request, response, next) =>{
-    console.error(error.message);
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message);
 
-    if(error.name==='CastError' && error.kind === 'ObjectId'){
-        return response.status(400).send({ error: 'malformatted id'});
-    }
-    else if(error.name === 'ValidationError'){
-        return response.status(400).json({ error: error.message })
-    }
+  if(error.name==='CastError' && error.kind === 'ObjectId'){
+    return response.status(400).send({ error: 'malformatted id' });
+  }
+  else if(error.name === 'ValidationError'){
+    return response.status(400).json({ error: error.message });
+  }
 
-    next(error)
-}
+  next(error);
+};
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+  console.log(`Server running on port ${PORT}`);
 });

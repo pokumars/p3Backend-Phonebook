@@ -7,28 +7,28 @@ mongoose.set('useFindAndModify', false);
 
 const url = process.env.MONGODB_URI;
 mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true  })
-.then(result =>{
+  .then(() => {
     console.log('connected to MongoDB');
-})
-.catch((err)=> {
+  })
+  .catch((err) => {
     console.log('error connecting to MongoDB:', err.message);
-});
+  });
 
 //mongoDB doesnt care about what you post so 
 //you have to define and restrict by schema on app level
 const personSchema = new mongoose.Schema({
-    name: {type: String, required: true, minlength: 3},
-    number: {type: String, required: true, unique: true, minlength: 8}
+  name: { type: String, required: true, minlength: 3  },
+  number: { type: String, required: true, unique: true, minlength: 8 }
 });
 personSchema.plugin(uniqueValidator);
 
 //format the received json to remove _id and __v fields
 personSchema.set('toJSON', {
-transform: (document, returnedObject) => {
+  transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString();
     delete returnedObject._id;
     delete returnedObject.__v;
-}
+  }
 });
 
 //create an object(or 'class') called Person based on the schema (or interface) personSchema
