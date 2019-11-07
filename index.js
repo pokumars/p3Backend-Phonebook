@@ -1,11 +1,14 @@
 const express = require('express');
 require('dotenv').config();
+const bodyParser = require('body-parser');
 const Person =require('./models/person');
 const cors = require('cors');
+
+
 const app = express();
 app.use(cors());
 
-const bodyParser = require('body-parser');
+
 
 app.use(bodyParser.json());
 app.use(express.static('build'));
@@ -62,7 +65,9 @@ app.get('/', (request, response)=> {
 
 app.get('/api/persons', (request, response)=> {
     //response.json(persons);
-    Person.find({}).then(persons => response.json(persons));
+    Person.find({})
+    .then(persons => response.json(persons))
+    .catch(error => next(error));
 });
 
 app.get('/api/persons/:id', (request, response)=> {
@@ -70,7 +75,8 @@ app.get('/api/persons/:id', (request, response)=> {
     console.log(`Request id ${id}`);
 
     Person.findById(id)
-    .then(person =>response.json(person.toJSON()));
+    .then(person =>response.json(person.toJSON()))
+    .catch(error => next(error));
 });
 
 app.get('/info', (request, response)=> {
@@ -85,9 +91,7 @@ app.delete('/api/persons/:id', (request, response)=> {
     Person.findByIdAndRemove(id)
     .then(result => {
         response.status(204).end()
-    }).catch(error => {
-        console.log(error.message);
-    })
+    }).catch(error => next(error));
 });
 
 /*app.put('/api/persons/:id',(request, response)=> {
@@ -109,10 +113,6 @@ app.delete('/api/persons/:id', (request, response)=> {
         response.json(resObj);
     }
 });*/
-
-const generateId= ()=> {
-    return Math.floor(Math.random() *1000) + 1
-}
 
 app.post('/api/persons',(request, response) => {
     const body = request.body;
@@ -160,10 +160,16 @@ app.post('/api/persons',(request, response) => {
     }*/
 });
 
+const errorHandler = (error, request, response, next) =>{
+    console.error(error.message);
 
-//const port = 3001;
-//app.listen(port);
-//console.log(`Server running on port ${port}`);
+    if(error.name==='CastError' && error.kind === 'ObjectId'){
+        return response.status(400).send({ error: 'malformatted id'});
+    }
+
+    next(error)
+}
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
