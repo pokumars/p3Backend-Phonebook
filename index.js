@@ -80,8 +80,12 @@ app.get('/api/persons/:id', (request, response)=> {
 });
 
 app.get('/info', (request, response)=> {
-    response.send(`<p>Phonebook has ${persons.length} contacts. 
+    Person.find().count((err, count)=>{
+        console.log("Number of docs: ", count );
+
+        response.send(`<p>Phonebook has ${count} contacts. 
     <br> ${new Date()}</p>`)
+    });
 });
 
 app.delete('/api/persons/:id', (request, response)=> {
@@ -116,6 +120,8 @@ app.delete('/api/persons/:id', (request, response)=> {
 
 app.post('/api/persons',(request, response) => {
     const body = request.body;
+    const id= request.params.id;
+    var query = { name: `${body.name}` };
 
     if(!body.name || !body.number){//if body is empty
         return response.status(400).json({
@@ -127,37 +133,47 @@ app.post('/api/persons',(request, response) => {
         name: body.name,
         number: body.number
     });
+    const personToUpdateOrAdd = { $set: {
+        name: body.name,
+        number: body.number
+    } }
 
-    person.save()
-    .then(savedPerson =>{
-        response.json(savedPerson.toJSON())
+    //For 3.17 we want to update if it already exists and add if it doesnt 
+    //findOneAndUpdate() with option 'upsert' set to true does exactly that
+    Person.findOneAndUpdate(
+        query,
+        personToUpdateOrAdd,
+        {new: true, upsert: true})
+    .then(returnedPerson =>{
+        response.json(returnedPerson.toJSON())
     });
 
-    /*const nameExists = persons.find((p)=> p.name === body.name);
-    const numberExists = persons.find((p)=> p.number === body.number);
     
-    if(nameExists){
+
+    
+    //const numberExists = persons.find((p)=> p.number === body.number);
+    
+    /*if(nameExists){
         console.log(JSON.stringify(nameExists));
         response.status(400).json({
             error:"The name already exists in phonebook"
         });
     }
-    else if(numberExists){
+    else{//save name to mongoDB
+        person.save()
+        .then(savedPerson =>{
+            response.json(savedPerson.toJSON())
+        });
+    }*/
+
+    /**
+     else if(numberExists){
         console.log(JSON.stringify(numberExists));
         response.status(400).json({
             error:"The number already exists in phonebook"
         });
-    }else{
-        const newPerson = {
-            "name": body.name,
-            "number": body.number,
-            "id": generateId()
-        }
-    
-        persons = persons.concat(newPerson);
-        console.log(newPerson);
-        response.json(newPerson)
-    }*/
+    }
+     */
 });
 
 const errorHandler = (error, request, response, next) =>{
