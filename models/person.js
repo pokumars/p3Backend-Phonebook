@@ -17,8 +17,8 @@ mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true  })
 //mongoDB doesnt care about what you post so 
 //you have to define and restrict by schema on app level
 const personSchema = new mongoose.Schema({
-    name: {type: String, required: true},
-    number: {type: String, required: true, unique: true}
+    name: {type: String, required: true, minlength: 3},
+    number: {type: String, required: true, unique: true, minlength: 8}
 });
 personSchema.plugin(uniqueValidator);
 
